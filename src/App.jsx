@@ -7,18 +7,19 @@ const SIGNATURE_DECODE_ABI = [
         inputs: [
             { internalType: "bytes32", name: "messageHash", type: "bytes32" },
             { internalType: "bytes", name: "messageSignatures", type: "bytes" },
-            { internalType: "uint256", name: "pos", type: "uint256" }
+            { internalType: "uint256", name: "pos", type: "uint256" },
         ],
         name: "recoverKey",
         outputs: [{ internalType: "address", name: "", type: "address" }],
         stateMutability: "pure",
-        type: "function"
-    }
+        type: "function",
+    },
 ];
 
 export default function App() {
     const [string, setString] = useState("");
     const [integer, setInteger] = useState("");
+    const [data, setData] = useState("");
     const [hash, setHash] = useState("");
     const [sig, setSig] = useState("");
     const [web3, setWeb3] = useState(undefined);
@@ -51,12 +52,12 @@ export default function App() {
     };
 
     const clear = () => {
-        setString('');
-        setInteger('');
-        setHash('');
-        setSig('');
+        setString("");
+        setInteger("");
+        setHash("");
+        setSig("");
         setRecoverredAccounts([]);
-    }
+    };
 
     useEffect(() => {
         const init = async () => {
@@ -72,10 +73,10 @@ export default function App() {
             );
             setSignatureDecoder(contract);
 
-            window.ethereum.on("accountsChanged", async accounts => {
+            window.ethereum.on("accountsChanged", async (accounts) => {
                 setAccount(accounts[0]);
             });
-            window.ethereum.on("networkChanged", async chainId => {
+            window.ethereum.on("networkChanged", async (chainId) => {
                 setChainId(chainId);
                 clear();
             });
@@ -85,11 +86,12 @@ export default function App() {
 
     const computeHash = async () => {
         try {
-            const data = await web3.eth.abi.encodeParameters(
+            const _data = await web3.eth.abi.encodeParameters(
                 ["uint256", "string"],
                 [integer, string]
             );
-            const _hash = web3.utils.keccak256(data);
+            setData(_data);
+            const _hash = web3.utils.keccak256(_data);
             setHash(_hash);
         } catch (e) {
             console.log("Error", e);
@@ -142,17 +144,18 @@ export default function App() {
                         type="number"
                         placeholder="integer"
                         value={integer}
-                        onChange={e => setInteger(e.target.value)}
+                        onChange={(e) => setInteger(e.target.value)}
                     />
                     <p> Input integer: {integer} </p>
                     <input
                         type="text"
                         placeholder="string"
                         value={string}
-                        onChange={e => setString(e.target.value)}
+                        onChange={(e) => setString(e.target.value)}
                     />
                     <p> Input string: {string} </p>
                     <button onClick={computeHash}>Compute Hash</button>
+                    <p>Computed Data: {data}</p>
                     <p>Computed Hash: {hash}</p>
                     <button onClick={signHash}>Sign Hash</button>
                     <p>Number of Signs: {numSignatures}</p>
